@@ -1,0 +1,42 @@
+apiVersion: k8s.keycloak.org/v2beta1
+kind: Keycloak
+metadata:
+  name: rhdh-keycloak
+  namespace: rhdh-auth
+  labels:
+    app: rhdh-keycloak
+spec:
+  instances: 1
+  db:
+    vendor: postgres
+    host: keycloak-db
+    usernameSecret:
+      name: keycloak-db-secret
+      key: username
+    passwordSecret:
+      name: keycloak-db-secret
+      key: password
+    database: keycloak
+  http:
+    httpEnabled: true
+  hostname:
+    hostname: rhdh-keycloak-rhdh-auth.apps-crc.testing
+    strict: false
+  additionalOptions:
+    - name: proxy-headers
+      value: xforwarded
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: rhdh-keycloak
+  namespace: rhdh-auth
+spec:
+  to:
+    kind: Service
+    name: rhdh-keycloak-service
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

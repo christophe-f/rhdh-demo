@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: template-org-users
+  namespace: rhdh
+data:
+  users.yaml: |
+    apiVersion: backstage.io/v1alpha1
+    kind: User
+    metadata:
+      name: developer
+      annotations:
+        keycloak.org/id: 2d07b952-714d-4d08-b849-37c2270e60be
+    spec:
+      profile:
+        displayName: Dev User
+        email: developer@example.com
+      memberOf: [developers]
+    ---
+    apiVersion: backstage.io/v1alpha1
+    kind: Group
+    metadata:
+      name: developers
+    spec:
+      type: team
+      profile:
+        displayName: Developers
+        email: dev-team@example.com
+      children: []
+    ---
+    apiVersion: backstage.io/v1alpha1
+    kind: User
+    metadata:
+      name: platform-admin
+      annotations:
+        keycloak.org/id: ac56f55c-57d8-41fe-83e8-c625d7ef2701
+    spec:
+      profile:
+        displayName: Admin User
+        email: admin@example.com
+      memberOf: [platform-engineers]
+    ---
+    apiVersion: backstage.io/v1alpha1
+    kind: Group
+    metadata:
+      name: platform-engineers
+    spec:
+      type: team
+      profile:
+        displayName: Platform Engineers
+        email: admin-team@example.com
+      children: []

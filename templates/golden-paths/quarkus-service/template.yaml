@@ -1,0 +1,92 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: quarkus-cloud-native-service
+  title: Quarkus Cloud-Native Microservice
+  description: Create a production-ready Quarkus service with integrated Tekton CI Pipeline and ArgoCD GitOps deployment.
+  tags:
+    - recommended
+    - java
+    - quarkus
+    - tekton
+    - argocd
+spec:
+  owner: platform-team
+  type: service
+
+  parameters:
+    - title: Component Information
+      required:
+        - component_id
+        - description
+        - owner
+      properties:
+        component_id:
+          title: Service Name
+          type: string
+          description: Unique name of the microservice
+          ui:autofocus: true
+        description:
+          title: Description
+          type: string
+          description: A short description of what this microservice does
+          default: "High performance Quarkus REST API service"
+        owner:
+          title: Owner
+          type: string
+          description: Team or user responsible for this service
+          default: "dev-team"
+
+    - title: Deployment & CI/CD Configuration
+      required:
+        - namespace
+        - repoUrl
+      properties:
+        namespace:
+          title: Target OpenShift Namespace
+          type: string
+          description: Namespace where Tekton will build and ArgoCD will deploy
+          default: "rhdh-apps"
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    - id: template
+      name: Generating Skeleton Files
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          component_id: ${{ parameters.component_id }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          namespace: ${{ parameters.namespace }}
+
+    - id: publish
+      name: Publish Repository
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: ${{ parameters.description }}
+        repoUrl: ${{ parameters.repoUrl }}
+        defaultBranch: main
+
+    - id: register
+      name: Register Component in Catalog
+      action: catalog:register
+      input:
+        catalogInfoUrl: ${{ steps['publish'].output.remoteUrl }}/catalog-info.yaml
+
+  output:
+    links:
+      - title: Source Repository
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open in Catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
+

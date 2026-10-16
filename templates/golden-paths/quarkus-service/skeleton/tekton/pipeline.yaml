@@ -1,0 +1,53 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: ${{ values.component_id }}-build-pipeline
+  namespace: ${{ values.namespace }}
+  labels:
+    app.kubernetes.io/part-of: ${{ values.component_id }}
+    janus-idp.io/tekton: ${{ values.component_id }}
+spec:
+  params:
+    - name: git-url
+      type: string
+      description: The Git repository URL
+    - name: git-revision
+      type: string
+      default: main
+      description: The Git branch or commit to build
+    - name: image-name
+      type: string
+      default: image-registry.openshift-image-registry.svc:5000/${{ values.namespace }}/${{ values.component_id }}:latest
+  workspaces:
+    - name: shared-workspace
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+        kind: ClusterTask
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: revision
+          value: $(params.git-revision)
+        - name: deleteExisting
+          value: "true"
+
+    - name: build-service
+      runAfter:
+        - fetch-repository
+      taskRef:
+        name: maven
+        kind: ClusterTask
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      params:
+        - name: GOALS
+          value:
+            - package
+            - -DskipTests
+            - -Dquarkus.package.type=fast-jar

@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ${{ values.component_id }}
+  namespace: openshift-gitops
+  labels:
+    app.kubernetes.io/name: ${{ values.component_id }}
+    argocd/app-name: ${{ values.component_id }}
+spec:
+  project: default
+  source:
+    repoURL: ${{ steps['publish'].output.remoteUrl }}
+    targetRevision: HEAD
+    path: k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ${{ values.namespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

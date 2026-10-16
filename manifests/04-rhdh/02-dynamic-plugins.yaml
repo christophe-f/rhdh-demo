@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dynamic-plugins-rhdh
+  namespace: rhdh
+data:
+  dynamic-plugins.yaml: |
+    plugins:
+      - package: './dynamic-plugins/dist/backstage-plugin-techdocs-backend-dynamic'
+        disabled: true
+      - package: './dynamic-plugins/dist/backstage-plugin-techdocs'
+        disabled: true
+      - package: './dynamic-plugins/dist/backstage-plugin-techdocs-module-addons-contrib'
+        disabled: true
+      - package: './dynamic-plugins/dist/backstage-community-plugin-topology'
+        disabled: false
+      - package: './dynamic-plugins/dist/backstage-plugin-kubernetes'
+        disabled: false
+      - package: './dynamic-plugins/dist/backstage-plugin-kubernetes-backend-dynamic'
+        disabled: false
+      - package: './dynamic-plugins/dist/backstage-community-plugin-catalog-backend-module-keycloak-dynamic'
+        disabled: true
+      - package: './dynamic-plugins/dist/backstage-community-plugin-rbac'
+        disabled: false
+      - package: './dynamic-plugins/dist/backstage-community-plugin-scaffolder-backend-module-kubernetes-dynamic'
+        disabled: false
+
